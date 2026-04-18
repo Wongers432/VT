@@ -1,7 +1,7 @@
 // State
 let inventory = [];
 const PASSCODE = 'vinted123'; // Simple password
-const SCRIPT_URL = ''; // Set to empty to use Local Browser Storage as the database
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3xMTlc-UGJ2iY2pMRMcBngb_vzGrn2MlA7i0rxvOiHoWkrjmdwNOL57OQvHb7wstVFg/exec'; // Set to empty to use Local Browser Storage as the database
 
 // Chart instances
 let salesChart = null;
