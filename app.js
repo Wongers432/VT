@@ -247,14 +247,14 @@ function renderTable(data) {
             <td>${item.id}</td>
             <td>${item.name}</td>
             <td>
-                £<input type="number" step="0.01" class="inline-edit-price glass-input" data-id="${item.id}" value="${parseFloat(item.price).toFixed(2)}">
+                £<input type="number" step="0.01" class="inline-edit-price glass-input" data-id="${item.id}" value="${parseFloat(item.price || 0).toFixed(2)}">
             </td>
-            <td>£${parseFloat(item.cost).toFixed(2)}</td>
+            <td>£${parseFloat(item.cost || 0).toFixed(2)}</td>
             <td>
-                <select class="inline-edit-status glass-input status-${item.status.toLowerCase()}" data-id="${item.id}">
-                    <option value="Available" ${item.status === 'Available' ? 'selected' : ''}>Available</option>
-                    <option value="Reserved" ${item.status === 'Reserved' ? 'selected' : ''}>Reserved</option>
-                    <option value="Sold" ${item.status === 'Sold' ? 'selected' : ''}>Sold</option>
+                <select class="inline-edit-status glass-input status-${(item.status || 'Available').toLowerCase()}" data-id="${item.id}">
+                    <option value="Available" ${(item.status || 'Available') === 'Available' ? 'selected' : ''}>Available</option>
+                    <option value="Reserved" ${(item.status || '') === 'Reserved' ? 'selected' : ''}>Reserved</option>
+                    <option value="Sold" ${(item.status || '') === 'Sold' ? 'selected' : ''}>Sold</option>
                 </select>
             </td>
             <td>${item.condition}</td>
