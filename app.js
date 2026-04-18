@@ -164,7 +164,10 @@ async function loadData() {
     }
 
     try {
-        const response = await fetch(`${SCRIPT_URL}?passcode=${PASSCODE}`);
+        // Add a timestamp to prevent the browser from caching old data
+        const response = await fetch(`${SCRIPT_URL}?passcode=${PASSCODE}&t=${new Date().getTime()}`);
+        if (!response.ok) throw new Error("Network response was not ok");
+
         const result = await response.json();
 
         if (result.success) {
@@ -172,9 +175,12 @@ async function loadData() {
             renderTable(inventory);
             updateStatistics();
         } else {
+            elements.inventoryTbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #ef4444;">Error loading data: ${result.error}</td></tr>`;
             showToast('Error loading data: ' + result.error, 'error');
         }
     } catch (e) {
+        console.error(e);
+        elements.inventoryTbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #ef4444;">Connection error to Google Sheets. Make sure you aren't blocking scripts.</td></tr>`;
         showToast('Connection error', 'error');
     } finally {
         elements.loadingIndicator.classList.add('hidden');
