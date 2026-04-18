@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vinted Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Login Screen -->
+        <div id="login-screen" class="screen active">
+            <div class="login-card glass">
+                <div class="login-header">
+                    <i class="ph ph-lock-key"></i>
+                    <h2>Vinted Tracker</h2>
+                </div>
+                <form id="login-form">
+                    <div class="input-group">
+                        <label for="password">Enter Passcode</label>
+                        <input type="password" id="password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn primary">Login</button>
+                    <p id="login-error" class="error-text hidden">Incorrect password.</p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main App Screen -->
+        <div id="main-screen" class="screen hidden">
+            <!-- Sidebar -->
+            <nav class="sidebar glass">
+                <div class="brand">
+                    <i class="ph ph-handbag"></i>
+                    <h2>Vinted<br>Tracker</h2>
+                </div>
+                <ul class="nav-links">
+                    <li class="active" data-target="dashboard"><i class="ph ph-squares-four"></i> Dashboard</li>
+                    <li data-target="statistics"><i class="ph ph-chart-line-up"></i> Statistics</li>
+                </ul>
+                <div class="nav-footer">
+                    <button id="logout-btn" class="btn text-btn"><i class="ph ph-sign-out"></i> Logout</button>
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <main class="content">
+                <!-- Header -->
+                <header class="top-bar glass">
+                    <div class="mobile-menu-toggle">
+                        <i class="ph ph-list"></i>
+                    </div>
+                    <div class="search-bar">
+                        <i class="ph ph-magnifying-glass"></i>
+                        <input type="text" id="search-input" placeholder="Search items by name, ID, or tags...">
+                    </div>
+                    <button id="add-item-btn" class="btn primary"><i class="ph ph-plus"></i> Add Item</button>
+                </header>
+
+                <!-- Views -->
+                <div id="view-dashboard" class="view active">
+                    <div class="table-container glass">
+                        <div class="table-responsive">
+                            <table id="inventory-table">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th class="sortable" data-sort="id">Item ID <i class="ph ph-caret-up-down"></i></th>
+                                        <th class="sortable" data-sort="name">Name <i class="ph ph-caret-up-down"></i></th>
+                                        <th class="sortable" data-sort="price">Price <i class="ph ph-caret-up-down"></i></th>
+                                        <th class="sortable" data-sort="cost">Cost <i class="ph ph-caret-up-down"></i></th>
+                                        <th class="sortable" data-sort="status">Status <i class="ph ph-caret-up-down"></i></th>
+                                        <th class="sortable" data-sort="condition">Condition <i class="ph ph-caret-up-down"></i></th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-tbody">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="loading-indicator" class="loading-indicator hidden">
+                            <i class="ph ph-spinner ph-spin"></i> Loading Data...
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-statistics" class="view hidden">
+                    <div class="stats-grid">
+                        <div class="stat-card glass">
+                            <i class="ph ph-currency-gbp stat-icon green"></i>
+                            <div class="stat-info">
+                                <h3>Total Sales</h3>
+                                <p id="stat-total-sales">£0.00</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <i class="ph ph-trend-up stat-icon purple"></i>
+                            <div class="stat-info">
+                                <h3>Profit Margin</h3>
+                                <p id="stat-profit-margin">0%</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <i class="ph ph-tag stat-icon blue"></i>
+                            <div class="stat-info">
+                                <h3>Avg Item Price</h3>
+                                <p id="stat-avg-price">£0.00</p>
+                            </div>
+                        </div>
+                        <div class="stat-card glass">
+                            <i class="ph ph-package stat-icon orange"></i>
+                            <div class="stat-info">
+                                <h3>Total Stock</h3>
+                                <p id="stat-total-stock">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="charts-grid">
+                        <div class="chart-card glass">
+                            <h3>Revenue Overview</h3>
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                        <div class="chart-card glass">
+                            <h3>Category Breakdown</h3>
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="item-modal" class="modal hidden">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2 id="modal-title">Add Item</h2>
+                <button id="close-modal-btn" class="btn icon-btn"><i class="ph ph-x"></i></button>
+            </div>
+            <form id="item-form">
+                <input type="hidden" id="edit-original-id">
+                <input type="hidden" id="edit-row-index">
+                
+                <div class="form-grid">
+                    <div class="input-group full-width image-upload-group">
+                        <label for="item-image" class="image-upload-label">
+                            <div class="image-preview" id="image-preview-container">
+                                <i class="ph ph-image"></i>
+                                <span>Upload Image</span>
+                            </div>
+                        </label>
+                        <input type="file" id="item-image" accept="image/*" class="hidden">
+                        <input type="hidden" id="image-base64">
+                        <input type="hidden" id="image-url"> <!-- Store existing URL -->
+                    </div>
+
+                    <div class="input-group">
+                        <label for="item-id">Item ID</label>
+                        <input type="text" id="item-id" placeholder="e.g. V-001" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="item-name">Item Name*</label>
+                        <input type="text" id="item-name" required placeholder="e.g. Vintage Nike Hoodie">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="item-price">Sale Price (£)*</label>
+                        <input type="number" id="item-price" step="0.01" required placeholder="0.00">
+                    </div>
+                    <div class="input-group">
+                        <label for="item-cost">Cost Price (£)*</label>
+                        <input type="number" id="item-cost" step="0.01" required placeholder="0.00">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="item-status">Status*</label>
+                        <select id="item-status" required>
+                            <option value="Available">Available</option>
+                            <option value="Reserved">Reserved</option>
+                            <option value="Sold">Sold</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="item-condition">Condition*</label>
+                        <select id="item-condition" required>
+                            <option value="New with tags">New with tags</option>
+                            <option value="New without tags">New without tags</option>
+                            <option value="Very Good">Very Good</option>
+                            <option value="Good">Good</option>
+                            <option value="Satisfactory">Satisfactory</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group full-width">
+                        <label for="item-tags">Tags/Category</label>
+                        <input type="text" id="item-tags" placeholder="e.g. Hoodie, Nike, Vintage">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="cancel-modal-btn" class="btn text-btn">Cancel</button>
+                    <button type="submit" class="btn primary" id="save-item-btn"><i class="ph ph-check"></i> Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <i class="ph ph-info"></i>
+        <span id="toast-message">Notification</span>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal hidden">
+        <div class="modal-content glass small-modal">
+            <div class="modal-header">
+                <h2>Confirm Delete</h2>
+            </div>
+            <p id="confirm-message">Are you sure you want to delete this item?</p>
+            <div class="modal-footer">
+                <button type="button" id="cancel-confirm-btn" class="btn text-btn">Cancel</button>
+                <button type="button" id="confirm-delete-btn" class="btn danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
